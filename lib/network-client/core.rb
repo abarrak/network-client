@@ -29,19 +29,19 @@ module NetworkClient
       set_response_struct
     end
 
-    def get(path, params)
+    def get(path, params = {})
       request_json :get, path, params
     end
 
-    def post(path, params)
+    def post(path, params = {})
       request_json :post, path, params
     end
 
-    def put(path, params)
+    def put(path, params = {})
       request_json :put, path, params
     end
 
-    def delete(path, params)
+    def delete(path, params = {})
       request_json :delete, path, params
     end
 
@@ -69,10 +69,10 @@ module NetworkClient
       @response_struct = Struct.new(:code, :body)
     end
 
-    def request_json(method, path, params)
-      response = request(method, path, params)
-
+    def request_json(http_method, path, params)
+      response = request(http_method, path, params)
       body = JSON.parse(response.body)
+
       @response_struct.new(:code => response.code, :body => body)
 
     rescue JSON::ParserError => error
@@ -80,17 +80,17 @@ module NetworkClient
       response
     end
 
-    def request(method, path, params = {})
-      case method
+    def request(http_method, path, params = {})
+      case http_method
       when :get
         full_path = encode_path_params(path, params)
-        request = VERB_MAP[method.to_sym].new(full_path)
+        request = HTTP_VERBS[http_method].new(full_path)
       else
-        request = VERB_MAP[method.to_sym].new(path)
+        request = HTTP_VERBS[http_method].new(path)
         request.set_form_data(params)
       end
 
-      response = http_request
+      response = http_request(request)
       case code = response.code
       when Net::HTTPSuccess
         true
@@ -101,11 +101,11 @@ module NetworkClient
       response
     end
 
-    def http_request
+    def http_request(request)
       begin
         tries_count ||= @tries
         response = @http.request(request)
-      rescue Errno::ECONNREFUSED, Net::ReadTimeout, Net::OpenTimeout, HTTPI::SSLError => error
+      rescue Errno::ECONNREFUSED, Net::ReadTimeout, Net::OpenTimeout => error
         @logger.warn(error)
         retry unless (tries_count -= 1).zero?
       else
@@ -120,6 +120,7 @@ module NetworkClient
     end
 
     def encode_path_params(path, params)
+      return path if params.empty?
       encoded = URI.encode_www_form(params)
       [path, encoded].join("?")
     end
