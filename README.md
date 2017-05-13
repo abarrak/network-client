@@ -1,4 +1,4 @@
-# Network Client Gem
+# Network Client
 [![Gem Version](https://badge.fury.io/rb/network-client.svg)](https://rubygems.org/gems/network-client)
 [![Build Status](https://travis-ci.org/abarrak/network-client.svg?branch=master)](https://travis-ci.org/abarrak/network-client)
 
