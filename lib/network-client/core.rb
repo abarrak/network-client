@@ -25,7 +25,7 @@ module NetworkClient
       @uri = URI.parse(endpoint)
       @tries = tries
       set_http_client
-      set_logger(&block)
+      set_logger
       set_response_struct
     end
 
