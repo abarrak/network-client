@@ -84,9 +84,9 @@ module NetworkClient
       case http_method
       when :get
         full_path = encode_path_params(path, params)
-        request = HTTP_VERBS[http_method].new(full_path)
+        request = HTTP_VERBS[http_method].new(full_path, 'accept' => 'application/json')
       else
-        request = HTTP_VERBS[http_method].new(path)
+        request = HTTP_VERBS[http_method].new(path, 'accept' => 'application/json')
         request.set_form_data(params)
       end
 
