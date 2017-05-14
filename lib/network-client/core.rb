@@ -73,7 +73,7 @@ module NetworkClient
       response = request(http_method, path, params)
       body = JSON.parse(response.body)
 
-      @response_struct.new(:code => response.code, :body => body)
+      @response_struct.new(response.code, body)
 
     rescue JSON::ParserError => error
       @logger.error "parsing response body as json failed.\n Details: \n #{error.message}"
