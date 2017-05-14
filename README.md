@@ -34,4 +34,3 @@ Bug reports and pull requests are very much appreciated at [Github](https://gith
 
 ## License
 [MIT](http://opensource.org/licenses/MIT).
-
