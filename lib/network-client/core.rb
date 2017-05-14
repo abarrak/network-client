@@ -108,8 +108,8 @@ module NetworkClient
         tries_count ||= @tries
         response = @http.request(request)
       rescue Errno::ECONNREFUSED, Net::ReadTimeout, Net::OpenTimeout => error
-        @logger.warn(error)
-        retry unless (tries_count -= 1).zero?
+        @logger.warn(error.message)
+        (tries_count -= 1).zero? ? raise : retry
       else
         response
       end
