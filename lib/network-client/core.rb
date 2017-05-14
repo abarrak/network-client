@@ -81,12 +81,13 @@ module NetworkClient
     end
 
     def request(http_method, path, params = {})
+      headers = { 'accept' => 'application/json', 'Content-Type' => 'application/json' }
       case http_method
       when :get
         full_path = encode_path_params(path, params)
-        request = HTTP_VERBS[http_method].new(full_path, 'accept' => 'application/json')
+        request = HTTP_VERBS[http_method].new(full_path, )
       else
-        request = HTTP_VERBS[http_method].new(path, 'accept' => 'application/json')
+        request = HTTP_VERBS[http_method].new(path, headers)
         request.set_form_data(params)
       end
 
