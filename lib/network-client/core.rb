@@ -24,6 +24,7 @@ module NetworkClient
     def initialize(endpoint:, tries: 1)
       @uri = URI.parse(endpoint)
       @tries = tries
+
       set_http_client
       set_logger
       set_response_struct
@@ -45,24 +46,24 @@ module NetworkClient
       request_json :delete, path, params
     end
 
+    def set_logger
+      @logger = if defined?(Rails)
+        Rails.logger
+      elsif block_given?
+        yield
+      else
+        logger = Logger.new(STDOUT)
+        logger.level = Logger::DEBUG
+        logger
+      end
+    end
+
     private
 
     def set_http_client
       @http = Net::HTTP.new(@uri.host, @uri.port)
       @http.use_ssl = true
       @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    end
-
-    def set_logger
-      @logger ||= begin
-        if block_given?
-          yield
-        else
-          logger = Logger.new(STDOUT)
-          logger.level = Logger::DEBUG
-          logger
-        end
-      end
     end
 
     def set_response_struct
