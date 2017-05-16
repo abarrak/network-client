@@ -21,29 +21,30 @@ module NetworkClient
       :delete => Net::HTTP::Delete
     }
 
-    def initialize(endpoint:, tries: 1)
+    def initialize(endpoint:, tries: 1, headers: {})
       @uri = URI.parse(endpoint)
       @tries = tries
 
       set_http_client
+      set_default_headers(headers)
       set_logger
       set_response_struct
     end
 
-    def get(path, params = {})
-      request_json :get, path, params
+    def get(path, params = {}, headers = {})
+      request_json :get, path, params, headers
     end
 
-    def post(path, params = {})
-      request_json :post, path, params
+    def post(path, params = {}, headers = {})
+      request_json :post, path, params, headers
     end
 
-    def put(path, params = {})
-      request_json :put, path, params
+    def put(path, params = {}, headers = {})
+      request_json :put, path, params, headers
     end
 
-    def delete(path, params = {})
-      request_json :delete, path, params
+    def delete(path, params = {}, headers = {})
+      request_json :delete, path, params, headers
     end
 
     def set_logger
@@ -66,12 +67,17 @@ module NetworkClient
       @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
 
+    def set_default_headers(headers)
+      defaults = { 'accept' => 'application/json', 'Content-Type' => 'application/json' }
+      @default_headers = defaults.merge(headers)
+    end
+
     def set_response_struct
       @response_struct = Struct.new(:code, :body)
     end
 
-    def request_json(http_method, path, params)
-      response = request(http_method, path, params)
+    def request_json(http_method, path, params, headers)
+      response = request(http_method, path, params, headers)
       body = JSON.parse(response.body)
 
       @response_struct.new(response.code, body)
@@ -81,8 +87,9 @@ module NetworkClient
       response
     end
 
-    def request(http_method, path, params = {})
-      headers = { 'accept' => 'application/json', 'Content-Type' => 'application/json' }
+    def request(http_method, path, params, headers)
+      headers = @default_headers.merge(headers)
+
       case http_method
       when :get
         full_path = encode_path_params(path, params)
