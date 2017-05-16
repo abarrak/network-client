@@ -104,7 +104,7 @@ module NetworkClient
       when Net::HTTPSuccess
         true
       else
-        @logger.error "endpoint responded with a non-success #{code} code."
+        @logger.error "endpoint responded with a non-success #{response.code} code."
       end
 
       response
