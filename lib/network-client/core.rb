@@ -62,7 +62,7 @@ module NetworkClient
 
     def set_http_client
       @http = Net::HTTP.new(@uri.host, @uri.port)
-      @http.use_ssl = true
+      @http.use_ssl = @uri.scheme == 'https' ? true : false
       @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
 
@@ -107,7 +107,7 @@ module NetworkClient
       begin
         tries_count ||= @tries
         response = @http.request(request)
-      rescue Errno::ECONNREFUSED, Net::ReadTimeout, Net::OpenTimeout => error
+      rescue Errno::ECONNREFUSED, Net::ReadTimeout, Net::OpenTimeout, OpenSSL::SSL::SSLError => error
         @logger.warn(error.message)
         (tries_count -= 1).zero? ? raise : retry
       else
