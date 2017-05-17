@@ -47,6 +47,14 @@ module NetworkClient
       request_json :delete, path, params, headers
     end
 
+    def post_form(path, params = {}, headers = {})
+      raise NotImplementedError
+    end
+
+    def put_form(path, params = {}, headers = {})
+      raise NotImplementedError
+    end
+
     def set_logger
       @logger = if defined?(Rails)
         Rails.logger
@@ -96,7 +104,7 @@ module NetworkClient
         request = HTTP_VERBS[http_method].new(full_path, headers)
       else
         request = HTTP_VERBS[http_method].new(path, headers)
-        request.set_form_data(params)
+        request.body = params.to_s
       end
 
       response = http_request(request)
@@ -114,7 +122,7 @@ module NetworkClient
       begin
         tries_count ||= @tries
         response = @http.request(request)
-      rescue errors_to_recover_by_retry => error
+      rescue *errors_to_recover_by_retry => error
         @logger.warn(error.message)
         (tries_count -= 1).zero? ? raise : retry
       else
