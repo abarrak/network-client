@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    network-client (1.0.7)
+    network-client (1.0.8)
 
 GEM
   remote: https://rubygems.org/
