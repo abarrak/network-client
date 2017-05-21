@@ -123,7 +123,7 @@ module NetworkClient
         tries_count ||= @tries
         response = @http.request(request)
       rescue *errors_to_recover_by_retry => error
-        @logger.warn(error.message)
+        @logger.warn("[Error]: #{error.message} \nRetry ..")
         (tries_count -= 1).zero? ? raise : retry
       else
         response
@@ -132,7 +132,7 @@ module NetworkClient
 
     def errors_to_recover_by_retry
       [Errno::ECONNREFUSED, Net::HTTPServiceUnavailable, Net::ProtocolError, Net::ReadTimeout,
-       Net::OpenTimeout, OpenSSL::SSL::SSLError]
+       Net::OpenTimeout, OpenSSL::SSL::SSLError, SocketError]
     end
 
     def errors_to_recover_by_propogate
