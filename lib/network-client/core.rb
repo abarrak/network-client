@@ -21,6 +21,24 @@ module NetworkClient
       :delete => Net::HTTP::Delete
     }
 
+    DEFAULT_HEADERS = { 'accept' => 'application/json',
+                        'Content-Type' => 'application/json' }.freeze
+
+    RESPONSE = Struct.new(:code, :body)
+
+    # Construct and prepare client for requests targeting :endpoint.
+    #
+    # = *endpoint*:
+    #   Uri for the host with scheam and port. any other segment like paths will be discarded.
+    # = *tries*:
+    #   Number to specify how many is to repeat falied calls.
+    # = *headers*:
+    #   Hash to contain any common HTTP headers to be set in client calls.
+    #
+    # Example:
+    # =>
+    #
+    #
     def initialize(endpoint:, tries: 1, headers: {})
       @uri = URI.parse(endpoint)
       @tries = tries
@@ -28,7 +46,6 @@ module NetworkClient
       set_http_client
       set_default_headers(headers)
       set_logger
-      set_response_struct
     end
 
     def get(path, params = {}, headers = {})
@@ -76,19 +93,14 @@ module NetworkClient
     end
 
     def set_default_headers(headers)
-      defaults = { 'accept' => 'application/json', 'Content-Type' => 'application/json' }
-      @default_headers = defaults.merge(headers)
-    end
-
-    def set_response_struct
-      @response_struct = Struct.new(:code, :body)
+      @default_headers = DEFAULT_HEADERS.merge(headers)
     end
 
     def request_json(http_method, path, params, headers)
       response = request(http_method, path, params, headers)
       body = JSON.parse(response.body)
 
-      @response_struct.new(response.code, body)
+      RESPONSE.new(response.code, body)
 
     rescue JSON::ParserError => error
       @logger.error "parsing response body as json failed.\n Details: \n #{error.message}"
@@ -123,7 +135,7 @@ module NetworkClient
         tries_count ||= @tries
         response = @http.request(request)
       rescue *errors_to_recover_by_retry => error
-        @logger.warn("[Error]: #{error.message} \nRetry ..")
+        @logger.warn "[Error]: #{error.message} \nRetry .."
         (tries_count -= 1).zero? ? raise : retry
       else
         response
