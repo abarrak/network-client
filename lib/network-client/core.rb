@@ -107,6 +107,7 @@ module NetworkClient
 
     def request(http_method, path, params, headers)
       headers = @default_headers.merge(headers)
+      path = formulate_path(path)
 
       case http_method
       when :get
@@ -146,12 +147,20 @@ module NetworkClient
     end
 
     def errors_to_recover_by_propogate
+      # TODO: make configurable set of errors that stop net call without retry.
     end
 
     def encode_path_params(path, params)
-      return path if params.empty?
-      encoded = URI.encode_www_form(params)
-      [path, encoded].join("?")
+      if params.empty?
+        path
+      else
+        encoded = URI.encode_www_form(params)
+        [path, encoded].join("?")
+      end
+    end
+
+    def formulate_path(path)
+      path.chars.last.nil? ? "#{path}/" : path
     end
   end
 end

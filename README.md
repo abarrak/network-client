@@ -20,7 +20,7 @@ And then execute:
 $ bundle
 ```
 
-Or install it yourself as:
+Or install the gem directly:
 
 ```sh
 $ gem install network-client
@@ -29,6 +29,7 @@ $ gem install network-client
 ## Usage
 
 
+For more refer to [the API docuemntation](#soon).
 
 ## Contributing
 
