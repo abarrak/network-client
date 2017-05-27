@@ -6,11 +6,8 @@ require 'logger'
 
 
 module NetworkClient
-  # This class is simple HTTP client that meant to be initialized configured with a single URI.
+  # This class is simple HTTP client that is meant to be initialized configured with a single URI.
   # Subsequent calls should target endpoints/paths of that URI.
-  #
-  # Return values of its rest-like methods is Struct holding two values for the code and response
-  # body parsed as JSON.
   #
   class Client
 
@@ -24,6 +21,8 @@ module NetworkClient
     DEFAULT_HEADERS = { 'accept' => 'application/json',
                         'Content-Type' => 'application/json' }.freeze
 
+    # Return values of rest-like methods is a struct holding two values:
+    # the response code, and body (parsed as JSON in json request).
     RESPONSE = Struct.new(:code, :body)
 
     # Construct and prepare client for requests targeting :endpoint.
@@ -37,7 +36,6 @@ module NetworkClient
     #
     # Example:
     # =>
-    #
     #
     def initialize(endpoint:, tries: 1, headers: {})
       @uri = URI.parse(endpoint)

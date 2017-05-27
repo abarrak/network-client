@@ -30,4 +30,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "factory_girl", "~> 4.5"
   spec.add_development_dependency "simplecov", "~> 0.14.1"
   spec.add_development_dependency "codeclimate-test-reporter", "~> 1.0"
+  spec.add_development_dependency "dotenv", "~> 2.2"
 end

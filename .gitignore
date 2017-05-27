@@ -53,3 +53,6 @@ build-iPhoneSimulator/
 .rvmrc
 
 # End of https://www.gitignore.io/api/ruby
+
+# Ignore publish script due to credentials
+.publish
