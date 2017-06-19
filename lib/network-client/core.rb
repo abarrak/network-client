@@ -6,9 +6,6 @@ require 'logger'
 
 
 module NetworkClient
-  # This class is simple HTTP client that is meant to be initialized configured with a single URI.
-  # Subsequent calls should target endpoints/paths of that URI.
-  #
   class Client
 
     HTTP_VERBS = {
@@ -21,28 +18,15 @@ module NetworkClient
     DEFAULT_HEADERS = { 'accept' => 'application/json',
                         'Content-Type' => 'application/json' }.freeze
 
-    # Return values of rest-like methods is a struct holding two values:
-    # the response code, and body (parsed as JSON in json request).
-    RESPONSE = Struct.new(:code, :body)
+    Response = Struct.new(:code, :body)
 
-    # Construct and prepare client for requests targeting :endpoint.
-    #
-    # = *endpoint*:
-    #   Uri for the host with scheam and port. any other segment like paths will be discarded.
-    # = *tries*:
-    #   Number to specify how many is to repeat falied calls.
-    # = *headers*:
-    #   Hash to contain any common HTTP headers to be set in client calls.
-    #
-    # Example:
-    # =>
-    #
-    def initialize(endpoint:, tries: 1, headers: {})
+    def initialize(endpoint:, tries: 1, headers: {}, username: nil, password: nil)
       @uri = URI.parse(endpoint)
       @tries = tries
 
       set_http_client
       set_default_headers(headers)
+      set_basic_auth(username, password)
       set_logger
     end
 
@@ -82,6 +66,11 @@ module NetworkClient
       end
     end
 
+    def set_basic_auth(username, password)
+      @username = username.nil? ? '' : username
+      @password = password.nil? ? '' : password
+    end
+
     private
 
     def set_http_client
@@ -98,7 +87,7 @@ module NetworkClient
       response = request(http_method, path, params, headers)
       body = JSON.parse(response.body)
 
-      RESPONSE.new(response.code, body)
+      Response.new(response.code, body)
 
     rescue JSON::ParserError => error
       @logger.error "parsing response body as json failed.\n Details: \n #{error.message}"
@@ -118,6 +107,7 @@ module NetworkClient
         request.body = params.to_s
       end
 
+      basic_auth(request)
       response = http_request(request)
       case response
       when Net::HTTPSuccess
@@ -138,6 +128,12 @@ module NetworkClient
         (tries_count -= 1).zero? ? raise : retry
       else
         response
+      end
+    end
+
+    def basic_auth(request)
+      unless @username.empty? && @password.empty?
+        request.basic_auth(@username, @password)
       end
     end
 
