@@ -1,9 +1,6 @@
 require 'net/http'
 require 'json'
-require 'securerandom'
-require 'erb'
 require 'logger'
-
 
 module NetworkClient
   class Client
@@ -55,10 +52,10 @@ module NetworkClient
     end
 
     def set_logger
-      @logger = if defined?(Rails)
-        Rails.logger
-      elsif block_given?
+      @logger = if block_given?
         yield
+      elsif defined?(Rails)
+        Rails.logger
       else
         logger = Logger.new(STDOUT)
         logger.level = Logger::DEBUG
