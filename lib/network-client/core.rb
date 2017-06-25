@@ -15,8 +15,39 @@ module NetworkClient
     DEFAULT_HEADERS = { 'accept' => 'application/json',
                         'Content-Type' => 'application/json' }.freeze
 
+    # The success response template. Represents the return of rest-like methods holding two values:
+    # HTTP response code, and body (parsed as json if request type is json).
     Response = Struct.new(:code, :body)
 
+    # Stamp in front of each log written by client *@logger*
+    LOG_TAG = "[NET CLIENT]:"
+
+    attr_reader :username, :password, :default_headers, :logger
+
+    # error list for retrying strategy. Takes priority over *:errors_to_propogate*.
+    # Initially contains common errors encountered usually in net calls.
+    attr_accessor :errors_to_recover
+
+    # error list for stop and propagate strategy. Contains only StandardError by default.
+    attr_accessor :errors_to_propagate
+    StandardError
+
+    # Construct and prepare client for requests targeting :endpoint.
+    #
+    # *endpoint*:
+    #   Uri for the host with schema and port. any other segment like paths will be discarded.
+    # *tries*:
+    #   Number to specify how many is to repeat failed calls.
+    # *headers*:
+    #   Hash to contain any common HTTP headers to be set in client calls.
+    # *username*:
+    #  for HTTP basic authentication. Applies on all requests.
+    # *password*:
+    #  for HTTP basic authentication. Applies on all requests.
+    #
+    # ==== Example:
+    # =>
+    #
     def initialize(endpoint:, tries: 1, headers: {}, username: nil, password: nil)
       @uri = URI.parse(endpoint)
       @tries = tries
@@ -25,6 +56,7 @@ module NetworkClient
       set_default_headers(headers)
       set_basic_auth(username, password)
       set_logger
+      define_error_strategies
     end
 
     def get(path, params = {}, headers = {})
@@ -87,7 +119,7 @@ module NetworkClient
       Response.new(response.code, body)
 
     rescue JSON::ParserError => error
-      @logger.error "parsing response body as json failed.\n Details: \n #{error.message}"
+      @logger.error "#{LOG_TAG}: Parsing response body as JSON failed.\nDetails: \n#{error.message}"
       response
     end
 
@@ -120,10 +152,12 @@ module NetworkClient
       begin
         tries_count ||= @tries
         response = @http.request(request)
-      rescue *errors_to_recover_by_retry => error
+      rescue *@errors_to_recover => error
         @logger.warn "[Error]: #{error.message} \nRetry .."
         (tries_count -= 1).zero? ? raise : retry
-      else
+      rescue *@errors_to_propogate
+        raise
+      ensure
         response
       end
     end
@@ -134,13 +168,11 @@ module NetworkClient
       end
     end
 
-    def errors_to_recover_by_retry
-      [Errno::ECONNREFUSED, Net::HTTPServiceUnavailable, Net::ProtocolError, Net::ReadTimeout,
-       Net::OpenTimeout, OpenSSL::SSL::SSLError, SocketError]
-    end
-
-    def errors_to_recover_by_propogate
-      # TODO: make configurable set of errors that stop net call without retry.
+    def define_error_strategies
+      @errors_to_recover   = [Errno::ECONNREFUSED, Net::HTTPServiceUnavailable, Net::ProtocolError,
+                              Net::ReadTimeout, Net::OpenTimeout, OpenSSL::SSL::SSLError,
+                              SocketError]
+      @errors_to_propogate = [StandardError]
     end
 
     def encode_path_params(path, params)
@@ -155,5 +187,6 @@ module NetworkClient
     def formulate_path(path)
       path.chars.last.nil? ? "#{path}/" : path
     end
+
   end
 end
