@@ -8,6 +8,7 @@ describe NetworkClient::Client do
     it "generates functioning client instance" do
       is_expected.to be_kind_of(NetworkClient::Client)
       is_expected.to be_a(NetworkClient::Client)
+      expect(subject.tries).to eq(2)
       [:get, :post, :put, :delete].each { |m| is_expected.to respond_to(m) }
 
       home_page = client.get '/users/abarrak'
@@ -18,16 +19,14 @@ describe NetworkClient::Client do
     end
 
     it "has default headers set" do
-      default_headers = subject.instance_variable_get(:@default_headers)
-      expect(default_headers).to be_kind_of(Hash)
-      expect(default_headers).to include('accept'       => 'application/json')
-      expect(default_headers).to include('Content-Type' => 'application/json')
+      expect(subject.default_headers).to be_kind_of(Hash)
+      expect(subject.default_headers).to include('accept'       => 'application/json')
+      expect(subject.default_headers).to include('Content-Type' => 'application/json')
     end
 
     it "has proper initialized logger" do
-      logger = subject.instance_variable_get(:@logger)
-      expect(logger).to be_kind_of(Logger)
-      [:debug, :info, :warn, :error, :fatal].each { |m| expect(logger).to respond_to(m) }
+      expect(subject.logger).to be_kind_of(Logger)
+      [:debug, :info, :warn, :error, :fatal].each { |m| expect(subject.logger).to respond_to(m) }
     end
 
     it "detects and use Rails logger" do
@@ -39,35 +38,45 @@ describe NetworkClient::Client do
         l.level = Logger::INFO
         l
       end
-      logger = subject.instance_variable_get(:@logger)
-      device = logger.instance_variable_get(:@logdev)
-      expect(logger.level).to eq(Logger::INFO)
-      expect(device.dev).to be(STDERR)
+      expect(subject.logger.level).to eq(Logger::INFO)
+      expect(subject.logger.instance_variable_get(:@logdev).dev).to be(STDERR)
     end
 
     it "encodes passed query parameters correctly in GET request" do
+    end
+
+    it "handles different shapes of urls provided" do
     end
   end
 
   example_group "JSON web client functionality out of the box" do
     example '#get' do
+      client = NetworkClient::Client.new(endpoint: 'https://quotes.rest/')
+      response = client.get('/qod.json', { category: 'inspire' })
+
+      expect(response.code).to eq('200')
+      expect(response.body).not_to be_empty
+      expect(response.body).to have_key('contents')
+      expect(response.body['contents']).to have_key('quotes')
+      expect(quotes = response.body['contents']['quotes']).to be_kind_of(Array)
+      expect(quotes.first).to include({ 'title' => 'Inspiring Quote of the day' })
     end
 
-    example '#post' do
+    example "#post" do
     end
 
-    example '#put' do
+    example "#put" do
     end
 
-    example '#delete' do
+    example "#delete" do
     end
   end
 
   example_group "Normal HTML form functionality" do
-    example '#post_form' do
+    example "#post_form" do
     end
 
-    example '#put_form' do
+    example "#put_form" do
     end
   end
 

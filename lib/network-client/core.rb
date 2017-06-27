@@ -20,9 +20,9 @@ module NetworkClient
     Response = Struct.new(:code, :body)
 
     # Stamp in front of each log written by client *@logger*
-    LOG_TAG = "[NET CLIENT]:"
+    LOG_TAG = '[NETWORK CLIENT]:'.freeze
 
-    attr_reader :username, :password, :default_headers, :logger
+    attr_reader :username, :password, :default_headers, :logger, :tries
 
     # error list for retrying strategy. Takes priority over *:errors_to_propogate*.
     # Initially contains common errors encountered usually in net calls.
@@ -30,7 +30,6 @@ module NetworkClient
 
     # error list for stop and propagate strategy. Contains only StandardError by default.
     attr_accessor :errors_to_propagate
-    StandardError
 
     # Construct and prepare client for requests targeting :endpoint.
     #
@@ -48,7 +47,7 @@ module NetworkClient
     # ==== Example:
     # =>
     #
-    def initialize(endpoint:, tries: 1, headers: {}, username: nil, password: nil)
+    def initialize(endpoint:, tries: 2, headers: {}, username: nil, password: nil)
       @uri = URI.parse(endpoint)
       @tries = tries
 
@@ -119,7 +118,7 @@ module NetworkClient
       Response.new(response.code, body)
 
     rescue JSON::ParserError => error
-      @logger.error "#{LOG_TAG}: Parsing response body as JSON failed.\nDetails: \n#{error.message}"
+      log "Parsing response body as JSON failed. Details:\n#{error.message}"
       response
     end
 
@@ -138,11 +137,9 @@ module NetworkClient
 
       basic_auth(request)
       response = http_request(request)
-      case response
-      when Net::HTTPSuccess
-        true
-      else
-        @logger.error "endpoint responded with a non-success #{response.code} code."
+
+      unless Net::HTTPSuccess === response
+        log "endpoint responded with a non-success #{response.code} code."
       end
 
       response
@@ -153,7 +150,7 @@ module NetworkClient
         tries_count ||= @tries
         response = @http.request(request)
       rescue *@errors_to_recover => error
-        @logger.warn "[Error]: #{error.message} \nRetry .."
+        log "#{error.message} \nRetrying now ..", level: :warn
         (tries_count -= 1).zero? ? raise : retry
       rescue *@errors_to_propogate
         raise
@@ -163,20 +160,17 @@ module NetworkClient
     end
 
     def basic_auth(request)
-      unless @username.empty? && @password.empty?
-        request.basic_auth(@username, @password)
-      end
+      request.basic_auth(@username, @password) unless @username.empty? && @password.empty?
     end
 
     def define_error_strategies
       @errors_to_recover   = [Errno::ECONNREFUSED, Net::HTTPServiceUnavailable, Net::ProtocolError,
-                              Net::ReadTimeout, Net::OpenTimeout, OpenSSL::SSL::SSLError,
-                              SocketError]
+                              Net::ReadTimeout, Net::OpenTimeout, OpenSSL::SSL::SSLError, SocketError]
       @errors_to_propogate = [StandardError]
     end
 
     def encode_path_params(path, params)
-      if params.empty?
+      if params.nil? || params.empty?
         path
       else
         encoded = URI.encode_www_form(params)
@@ -185,8 +179,13 @@ module NetworkClient
     end
 
     def formulate_path(path)
-      path.chars.last.nil? ? "#{path}/" : path
+      path = '/' if path.nil? || path.empty?
+      path.prepend('/') unless path.chars.first == '/'
+      path
     end
 
+    def log(message, level: :error)
+      @logger.send(level, "\n#{LOG_TAG} #{message}")
+    end
   end
 end

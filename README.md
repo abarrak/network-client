@@ -29,11 +29,18 @@ $ gem install network-client
 ## Usage
 
 
-For more refer to [the API docuemntation](#soon).
+For more details refer to [the API docuemntation](http://www.rubydoc.info/gems/network-client/).
 
 ## Contributing
 
 Bug reports and pull requests are very much appreciated at [Github](https://github.com/abarrak/network-client).
+
+  - Fork The repository.
+  - Create a branch with a clear name.
+  - Make your changes (Please also add/change test, README if applicable).
+  - Push changes to the created branch
+  - Create an Pull Request
+  - That's it!
 
 
 ## License
