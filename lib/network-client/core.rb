@@ -131,6 +131,7 @@ module NetworkClient
                               Net::ReadTimeout,
                               Net::OpenTimeout,
                               Errno::ECONNREFUSED,
+                              Errno::ETIMEDOUT,
                               OpenSSL::SSL::SSLError,
                               SocketError]
       @errors_to_propagate = [Net::HTTPRequestURITooLarge,
@@ -210,13 +211,15 @@ module NetworkClient
       if params.nil? || params.empty?
         path
       else
+        params = stringify_keys(params)
         encoded = URI.encode_www_form(params)
         [path, encoded].join("?")
       end
     end
 
     def formulate_path(path)
-      path = '/' if path.nil? || path.empty?
+      path = '/'  if path.nil? || path.empty?
+      path.strip! if path.respond_to?(:strip)
       path.prepend('/') unless path.chars.first == '/'
       path
     end
@@ -227,6 +230,10 @@ module NetworkClient
 
     def warn_on_retry(message)
       @logger.warn("\n#{LOG_TAG} #{message} \nRetrying now ..")
+    end
+
+    def stringify_keys(params)
+      params.respond_to?(:keys) ? params.collect { |k, v| [k.to_s, v] }.to_h : params
     end
   end
 end

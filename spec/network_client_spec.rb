@@ -5,18 +5,17 @@ require 'factories/factories'
 
 describe NetworkClient::Client do
   describe "Initialization and Normal Behavior" do
-    subject(:client) { NetworkClient::Client.new(endpoint: 'https://api.github.com', tries: 3) }
+    subject(:client) { NetworkClient::Client.new(endpoint: 'https://deckofcardsapi.com', tries: 3) }
 
     it "generates functioning instance" do
       is_expected.to be_kind_of(NetworkClient::Client)
       expect(subject.tries).to eq(3)
       [:get, :post, :put, :delete].each { |m| is_expected.to respond_to(m) }
 
-      home_page = client.get '/users/abarrak'
-      expect(home_page.code).to eq(200)
-      expect(home_page.body).not_to be_empty
-      expect(home_page.body.keys).to include('login', 'id', 'url', 'html_url')
-      expect(home_page.body['html_url']).to eq('https://github.com/abarrak')
+      response_payload = client.get '/api/deck/new/shuffle/?deck_count=1'
+      expect(response_payload.code).to eq(200)
+      expect(response_payload.body).not_to be_empty
+      expect(response_payload.body.keys).to include('success', 'deck_id', 'shuffled', 'remaining')
     end
 
     it "has default headers set" do
@@ -186,18 +185,18 @@ describe NetworkClient::Client do
     let(:base_url)      { 'https://api.github.com' }
     let(:sample_base)   { [base_url, "#{base_url}/", "#{base_url}:8080" ].sample }
     let(:github_client) { NetworkClient::Client.new endpoint: sample_base }
-    let(:access_hash)   { { 'Authorization' => "token #{ENV.fetch('GITHUB_OAUTH_TOKEN')}" } }
+    let(:access_param)  { { 'access_token' => ENV.fetch('GITHUB_OAUTH_TOKEN') } }
 
     specify "endpint with no path or empty path" do
       path = [nil, '', '   '].sample
-      res = github_client.get path, nil, access_hash
+      res = github_client.get path, access_param
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('user_url', 'feeds_url', 'gists_url')
     end
 
     specify "endpint with improper or proper path" do
       path = ['emojis', '/emojis'].sample
-      res = github_client.get path, nil, access_hash
+      res = github_client.get path, access_param
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('+1', 'smile', '2nd_place_medal')
     end
