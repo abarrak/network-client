@@ -15,11 +15,13 @@ module NetworkClient
     DEFAULT_HEADERS = { 'accept' => 'application/json',
                         'Content-Type' => 'application/json' }.freeze
 
-    # The success response template. Represents the return of rest-like methods holding two values:
-    # HTTP response code, and body (parsed as json if request type is json).
+    # The success response template.
+    #
+    # Represents the return of rest-like methods holding two values:
+    # HTTP response code, and body <em>(parsed as json if request type is json)</em>.
     Response = Struct.new(:code, :body)
 
-    # Stamp in front of each log written by client *@logger*
+    # Stamp in front of each log written by client +@logger+.
     LOG_TAG = '[NETWORK CLIENT]:'.freeze
 
     attr_reader :username, :password, :default_headers, :logger, :tries
@@ -29,35 +31,31 @@ module NetworkClient
     attr_accessor :errors_to_recover
 
     # Error list for stop and propagate strategy.
-    # Takes priority over *:errors_to_recover*.
+    # Takes priority over +@errors_to_recover+.
     # Do not assign ancestor error classes here that prevent retry for descendant ones.
     attr_accessor :errors_to_propagate
 
     ##
-    # Construct and prepare client for requests targeting :endpoint.
+    # Construct and prepare client for requests targeting +endpoint+.
     #
-    # === Parameters:
+    # == Parameters:
     #
-    # *endpoint*:
-    # Uri for the host with schema and port. any other segment like paths will be discarded.
-    # *tries*:
-    # Number to specify how many is to repeat failed calls. Default is 2.
-    # *headers*:
-    # Hash to contain any common HTTP headers to be set in client calls.
-    # *username*:
-    # for HTTP basic authentication. Applies on all requests. Default to nil.
-    # *password*:
-    # for HTTP basic authentication. Applies on all requests. Default to nil.
+    # [*endpoint*] +String+ Uri for the host with schema and port.
+    #              any other segment like paths will be discarded.
+    # [*tries*] +Integer+ to specify how many is to repeat failed calls. Default is 2.
+    # [*headers*] +Hash+ to contain any common HTTP headers to be set in client calls.
+    # [*username*] +String+ for HTTP basic authentication. Applies on all requests. Default to nil.
+    # [*password*] +String+ for HTTP basic authentication. Applies on all requests. Default to nil.
     #
-    # === Example:
+    # == Example:
     #   require "network-client"
     #
     #   github_client = NetworkClient::Client.new(endpoint: 'https://api.github.com')
     #   github_client.get '/emojis'
+    #
     #   #=> { "+1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44d.png?v7",
-    #        "-1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44e.png?v7",
-    #        "100": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f4af.png?v7",
-    #        ... }
+    #         "-1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44e.png?v7",
+    #         ... }
     #
     def initialize(endpoint:, tries: 2, headers: {}, username: nil, password: nil)
       @uri = URI.parse(endpoint)
