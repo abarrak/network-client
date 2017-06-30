@@ -25,14 +25,20 @@ describe NetworkClient::Client do
     end
 
     it "makes requests" do
-      # Quotes API has limit of 10 requests per hour .. just run this on Travis only.
-      if ENV['CI']
-        client = NetworkClient::Client.new(endpoint: 'https://quotes.rest/')
-        response = client.get('/qod.json', { category: 'inspire' })
-        expect(response.code).to eq(200)
-        expect(response.body).not_to be_empty
+      # Quotes API has limit of 10 requests per hour
+      client = NetworkClient::Client.new(endpoint: 'https://quotes.rest/')
+      client.set_logger { Logger.new(StringIO.new) }
+
+      response = client.get('/qod.json', { category: 'inspire' })
+      expect(response.body).not_to be_empty
+
+      if response.code == 200
         expect(quotes = response.body['contents']['quotes']).to be_kind_of(Array)
         expect(quotes.first).to include({ 'title' => 'Inspiring Quote of the day' })
+      else
+        expect(response.code).to be(429)
+        expect(error = response.body['error']).not_to be_empty
+        expect(error['message']).to match(/Too Many Requests: Rate limit of 10 requests per hour/)
       end
     end
 
@@ -182,23 +188,25 @@ describe NetworkClient::Client do
   end
 
   describe "handling different shapes of provided urls" do
-    let(:base_url)      { 'https://api.github.com' }
-    let(:sample_base)   { [base_url, "#{base_url}/", "#{base_url}:8080" ].sample }
-    let(:github_client) { NetworkClient::Client.new endpoint: sample_base }
-    let(:access_param)  { { 'access_token' => ENV.fetch('GITHUB_OAUTH_TOKEN') } }
-
     specify "endpint with no path or empty path" do
+      base = 'http://samples.openweathermap.org'
+      url  = [base, "#{base}/", "#{base}:80" ].sample
       path = [nil, '', '   '].sample
-      res = github_client.get path, access_param
+
+      client = NetworkClient::Client.new endpoint: url
+      res = client.get path
       expect(res.code).to eq(200)
-      expect(res.body.keys).to include('user_url', 'feeds_url', 'gists_url')
+      expect(res.body.keys).to include('name', 'products')
     end
 
     specify "endpint with improper or proper path" do
-      path = ['emojis', '/emojis'].sample
-      res = github_client.get path, access_param
+      client = NetworkClient::Client.new endpoint: 'http://api.openweathermap.org'
+      path = ['data/2.5/weather', '/data/2.5/weather'].sample
+      res = client.get path, { lat: 35, lon: 139, appid: ENV.fetch('OPEN_WEATHERMAP_API') }
       expect(res.code).to eq(200)
-      expect(res.body.keys).to include('+1', 'smile', '2nd_place_medal')
+      expect(res.body.keys).to include('coord', 'weather', 'main', 'wind', 'clouds')
+      expect(res.body['coord']['lat']).to be_within(0.5).of(35)
+      expect(res.body['coord']['lon']).to be_within(0.5).of(139)
     end
   end
 
