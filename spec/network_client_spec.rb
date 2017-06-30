@@ -186,18 +186,18 @@ describe NetworkClient::Client do
     let(:base_url)      { 'https://api.github.com' }
     let(:sample_base)   { [base_url, "#{base_url}/", "#{base_url}:8080" ].sample }
     let(:github_client) { NetworkClient::Client.new endpoint: sample_base }
-    let(:access_hash)   { { 'access_token' => ENV.fetch('GITHUB_OAUTH_TOKEN') } }
+    let(:access_hash)   { { 'Authorization' => "token #{ENV.fetch('GITHUB_OAUTH_TOKEN')}" } }
 
     specify "endpint with no path or empty path" do
       path = [nil, '', '   '].sample
-      res = github_client.get path, access_hash
+      res = github_client.get path, nil, access_hash
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('user_url', 'feeds_url', 'gists_url')
     end
 
     specify "endpint with improper or proper path" do
       path = ['emojis', '/emojis'].sample
-      res = github_client.get path, access_hash
+      res = github_client.get path, nil, access_hash
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('+1', 'smile', '2nd_place_medal')
     end
