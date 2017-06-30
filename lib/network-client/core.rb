@@ -24,11 +24,13 @@ module NetworkClient
 
     attr_reader :username, :password, :default_headers, :logger, :tries
 
-    # error list for retrying strategy. Takes priority over *:errors_to_propogate*.
+    # error list for retrying strategy.
     # Initially contains common errors encountered usually in net calls.
     attr_accessor :errors_to_recover
 
-    # error list for stop and propagate strategy. Contains only StandardError by default.
+    # error list for stop and propagate strategy.
+    # Takes priority over *:errors_to_recover*.
+    # Do not assign ancestor error classes here that prevent retry for descendant ones.
     attr_accessor :errors_to_propagate
 
     # Construct and prepare client for requests targeting :endpoint.
@@ -36,16 +38,23 @@ module NetworkClient
     # *endpoint*:
     #   Uri for the host with schema and port. any other segment like paths will be discarded.
     # *tries*:
-    #   Number to specify how many is to repeat failed calls.
+    #   Number to specify how many is to repeat failed calls. Default is 2.
     # *headers*:
     #   Hash to contain any common HTTP headers to be set in client calls.
     # *username*:
-    #  for HTTP basic authentication. Applies on all requests.
+    #  for HTTP basic authentication. Applies on all requests. Default to nil.
     # *password*:
-    #  for HTTP basic authentication. Applies on all requests.
+    #  for HTTP basic authentication. Applies on all requests. Default to nil.
     #
     # ==== Example:
+    # => require "network-client"
     # =>
+    # => github_client = NetworkClient::Client.new(endpoint: 'https://api.github.com')
+    # => github_client.get '/emojis'
+    # => { "+1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44d.png?v7",
+    # =>   "-1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44e.png?v7",
+    # =>   "100": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f4af.png?v7",
+    # =>   ... }
     #
     def initialize(endpoint:, tries: 2, headers: {}, username: nil, password: nil)
       @uri = URI.parse(endpoint)
@@ -111,15 +120,24 @@ module NetworkClient
       @default_headers = DEFAULT_HEADERS.merge(headers)
     end
 
+    def define_error_strategies
+      @errors_to_recover   = [Net::HTTPTooManyRequests,
+                              Net::HTTPServerError,
+                              Net::ProtocolError,
+                              Net::HTTPBadResponse,
+                              Net::ReadTimeout,
+                              Net::OpenTimeout,
+                              Errno::ECONNREFUSED,
+                              OpenSSL::SSL::SSLError,
+                              SocketError]
+      @errors_to_propagate = [Net::HTTPRequestURITooLarge,
+                              Net::HTTPMethodNotAllowed]
+    end
+
     def request_json(http_method, path, params, headers)
       response = request(http_method, path, params, headers)
-      body = JSON.parse(response.body)
-
-      Response.new(response.code, body)
-
-    rescue JSON::ParserError => error
-      log "Parsing response body as JSON failed. Details:\n#{error.message}"
-      response
+      body = parse_as_json(response.body)
+      Response.new(response.code.to_i, body)
     end
 
     def request(http_method, path, params, headers)
@@ -139,34 +157,50 @@ module NetworkClient
       response = http_request(request)
 
       unless Net::HTTPSuccess === response
-        log "endpoint responded with a non-success #{response.code} code."
+        log "endpoint responded with non-success #{response.code} code.\nResponse: #{response.body}"
       end
 
       response
-    end
-
-    def http_request(request)
-      begin
-        tries_count ||= @tries
-        response = @http.request(request)
-      rescue *@errors_to_recover => error
-        log "#{error.message} \nRetrying now ..", level: :warn
-        (tries_count -= 1).zero? ? raise : retry
-      rescue *@errors_to_propogate
-        raise
-      ensure
-        response
-      end
     end
 
     def basic_auth(request)
       request.basic_auth(@username, @password) unless @username.empty? && @password.empty?
     end
 
-    def define_error_strategies
-      @errors_to_recover   = [Errno::ECONNREFUSED, Net::HTTPServiceUnavailable, Net::ProtocolError,
-                              Net::ReadTimeout, Net::OpenTimeout, OpenSSL::SSL::SSLError, SocketError]
-      @errors_to_propogate = [StandardError]
+    def http_request(request)
+      tries_count ||= @tries
+      finished = ->() { (tries_count -= 1).zero? }
+
+      begin
+        response = @http.request(request)
+      end until !recoverable?(response) || finished.call
+      response
+
+    rescue *@errors_to_propagate => error
+      log "Request Failed. \nReason: #{error.message}"
+      raise
+
+    rescue *@errors_to_recover => error
+      warn_on_retry "#{error.message}"
+      finished.call ? raise : retry
+    end
+
+    def recoverable?(response)
+      if @errors_to_recover.any? { |error_class| response.is_a?(error_class) }
+        warn_on_retry "#{response.class} response type."
+        true
+      else
+        false
+      end
+    end
+
+    def parse_as_json(response_body)
+      body = response_body
+      body = body.nil? || body.empty? ? body : JSON.parse(body)
+
+    rescue JSON::ParserError => error
+      log "Parsing response body as JSON failed! Returning raw body. \nDetails: \n#{error.message}"
+      body
     end
 
     def encode_path_params(path, params)
@@ -184,8 +218,12 @@ module NetworkClient
       path
     end
 
-    def log(message, level: :error)
-      @logger.send(level, "\n#{LOG_TAG} #{message}")
+    def log(message)
+      @logger.error("\n#{LOG_TAG} #{message}.")
+    end
+
+    def warn_on_retry(message)
+      @logger.warn("\n#{LOG_TAG} #{message} \nRetrying now ..")
     end
   end
 end
