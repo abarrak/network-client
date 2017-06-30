@@ -180,39 +180,24 @@ describe NetworkClient::Client do
       expect(response.body).to be_a(String)
       expect(log_store.string).to match(/Parsing response body as JSON failed!/)
     end
-
-    specify "handling #errors_to_retry list by retry @tries times then re-raise" do
-    end
-
-    specify "handling #errors_to_propogate list by stopping call and re-raise" do
-    end
   end
 
   describe "handling different shapes of provided urls" do
     let(:base_url)      { 'https://api.github.com' }
     let(:sample_base)   { [base_url, "#{base_url}/", "#{base_url}:8080" ].sample }
     let(:github_client) { NetworkClient::Client.new endpoint: sample_base }
+    let(:access_hash)   { { 'access_token' => ENV.fetch('GITHUB_OAUTH_TOKEN') } }
 
-    specify "endpint with no path" do
-      res = github_client.get nil
+    specify "endpint with no path or empty path" do
+      path = [nil, '', '   '].sample
+      res = github_client.get path, access_hash
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('user_url', 'feeds_url', 'gists_url')
     end
 
-    specify "endpint with empty path" do
-      res = github_client.get ['', '   '].sample
-      expect(res.code).to eq(200)
-      expect(res.body.keys).to include('user_url', 'feeds_url', 'gists_url')
-    end
-
-    specify "endpint with improper path" do
-      res = github_client.get 'emojis'
-      expect(res.code).to eq(200)
-      expect(res.body.keys).to include('+1', 'smile', '2nd_place_medal')
-    end
-
-    specify "endpint with proper path" do
-      res = github_client.get '/emojis'
+    specify "endpint with improper or proper path" do
+      path = ['emojis', '/emojis'].sample
+      res = github_client.get path, access_hash
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('+1', 'smile', '2nd_place_medal')
     end

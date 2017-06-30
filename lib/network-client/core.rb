@@ -24,37 +24,40 @@ module NetworkClient
 
     attr_reader :username, :password, :default_headers, :logger, :tries
 
-    # error list for retrying strategy.
+    # Error list for retrying strategy.
     # Initially contains common errors encountered usually in net calls.
     attr_accessor :errors_to_recover
 
-    # error list for stop and propagate strategy.
+    # Error list for stop and propagate strategy.
     # Takes priority over *:errors_to_recover*.
     # Do not assign ancestor error classes here that prevent retry for descendant ones.
     attr_accessor :errors_to_propagate
 
+    ##
     # Construct and prepare client for requests targeting :endpoint.
     #
-    # *endpoint*:
-    #   Uri for the host with schema and port. any other segment like paths will be discarded.
-    # *tries*:
-    #   Number to specify how many is to repeat failed calls. Default is 2.
-    # *headers*:
-    #   Hash to contain any common HTTP headers to be set in client calls.
-    # *username*:
-    #  for HTTP basic authentication. Applies on all requests. Default to nil.
-    # *password*:
-    #  for HTTP basic authentication. Applies on all requests. Default to nil.
+    # === Parameters:
     #
-    # ==== Example:
-    # => require "network-client"
-    # =>
-    # => github_client = NetworkClient::Client.new(endpoint: 'https://api.github.com')
-    # => github_client.get '/emojis'
-    # => { "+1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44d.png?v7",
-    # =>   "-1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44e.png?v7",
-    # =>   "100": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f4af.png?v7",
-    # =>   ... }
+    # *endpoint*:
+    # Uri for the host with schema and port. any other segment like paths will be discarded.
+    # *tries*:
+    # Number to specify how many is to repeat failed calls. Default is 2.
+    # *headers*:
+    # Hash to contain any common HTTP headers to be set in client calls.
+    # *username*:
+    # for HTTP basic authentication. Applies on all requests. Default to nil.
+    # *password*:
+    # for HTTP basic authentication. Applies on all requests. Default to nil.
+    #
+    # === Example:
+    #   require "network-client"
+    #
+    #   github_client = NetworkClient::Client.new(endpoint: 'https://api.github.com')
+    #   github_client.get '/emojis'
+    #   #=> { "+1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44d.png?v7",
+    #        "-1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44e.png?v7",
+    #        "100": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f4af.png?v7",
+    #        ... }
     #
     def initialize(endpoint:, tries: 2, headers: {}, username: nil, password: nil)
       @uri = URI.parse(endpoint)
