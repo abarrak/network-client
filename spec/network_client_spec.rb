@@ -234,13 +234,25 @@ describe Network::Client do
     end
   end
 
-  describe "HTTP basic Authentication" do
+  describe "HTTP Authentication" do
     it "is supported" do
     end
   end
 
   describe "HTTP Token Authentication" do
-    it "is supported" do
+    it "is supported for bearer token type" do
+    end
+
+    it "is supported for custom token type too" do
+      token_header = "token #{ENV.fetch('GITHUB_OAUTH_TOKEN')}"
+      client = Network::Client.new(endpoint: 'https://api.github.com')
+
+      client.set_custom_token_auth(header_value: token_header)
+      expect(client.auth_token_header).to eq(token_header)
+
+      response = client.get "/user/starred/abarrak/network-client"
+      expect(response.code).to eq(204)
+      expect(response.body).to be_nil
     end
   end
 end

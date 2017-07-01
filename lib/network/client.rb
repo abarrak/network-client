@@ -15,7 +15,8 @@ module Network
     # Stamp in front of each log written by client +@logger+.
     LOG_TAG = '[NETWORK CLIENT]:'.freeze
 
-    attr_reader :username, :password, :default_headers, :logger, :tries, :user_agent
+    attr_reader :username, :password, :default_headers, :logger, :tries, :user_agent,
+                :bearer_token, :auth_token_header
 
     # Error list for retrying strategy.
     # Initially contains common errors encountered usually in net calls.
@@ -38,8 +39,8 @@ module Network
     # [*username*] +string+ for HTTP basic authentication. Applies on all requests. Default to nil.
     # [*password*] +string+ for HTTP basic authentication. Applies on all requests. Default to nil.
     # [*user_agent*] +string+ Specifies the _User-Agent_ header value when making requests.
-    # *User-Agent* header value provided within +headers+ param in +initialize+ or on one of request
-    # methods will take precendeance over +user_agent+ param.
+    # *User-Agent* header value provided within +headers+ parameter in +initialize+ or on one of
+    # request methods will take precedence over +user_agent+ parameter.
     #
     # == Example:
     #   require "network-client"
@@ -62,6 +63,8 @@ module Network
       set_logger
       define_error_strategies
       set_user_agent(headers['User-Agent'] || user_agent)
+      set_bearer_auth
+      set_custom_token_auth
     end
 
     ##
@@ -73,7 +76,7 @@ module Network
     # [*headers*] +hash+ set of http request headers.
     #
     # == Returns:
-    # http response data cotained in +Response+ strcut.
+    # http response data contained in +Response+ struct.
     #
     def get(path, params: {}, headers: {})
       request_json :get, path, params, headers
@@ -88,7 +91,7 @@ module Network
     # [*headers*] +hash+ set of http request headers.
     #
     # == Returns:
-    # http response data cotained in +Response+ strcut.
+    # http response data contained in +Response+ struct.
     #
     def post(path, params: {}, headers: {})
       request_json :post, path, params, headers
@@ -103,7 +106,7 @@ module Network
     # [*headers*] +hash+ set of http request headers.
     #
     # == Returns:
-    # http response data cotained in +Response+ strcut.
+    # http response data contained in +Response+ struct.
     #
     def patch(path, params: {}, headers: {})
       request_json :patch, path, params, headers
@@ -133,7 +136,7 @@ module Network
     # [*headers*] +hash+ set of http request headers.
     #
     # == Returns:
-    # http response data cotained in +Response+ strcut.
+    # http response data contained in +Response+ struct.
     #
     def delete(path, params: {}, headers: {})
       request_json :delete, path, params, headers
@@ -149,7 +152,7 @@ module Network
 
     ##
     # Sets the client logger object.
-    # Exceution is yieleded to passed +block+ to set, customize, and returning a logger instance.
+    # Execution is yielded to passed +block+ to set, customize, and returning a logger instance.
     #
     # == Returns:
     # +logger+ instance variable.
@@ -172,7 +175,34 @@ module Network
     end
 
     ##
-    # Assings a new +User-Agent+ header to be sent in any subsequesnt request.
+    # Assigns authentication bearer type token for use in standard HTTP authorization header.
+    #
+    # == Parameters:
+    # [*token*] +string+ bearer token value.
+    #
+    # == Returns:
+    # [@bearer_token] +string+ the newly assigned +@bearer_token+ value.
+    #
+    def set_bearer_auth(token: '')
+      @bearer_token = token
+    end
+
+    ##
+    # Assigns custom authentication token for use in standard HTTP authorization header.
+    # This takes precedence over Bearer authentication if both are set.
+    #
+    # == Parameters:
+    # [*header_value*] +string+ full authorization header value. _(e.g. Token token=123)_.
+    #
+    # == Returns:
+    # [@auth_token_header] +string+ the newly assigned +@auth_token_header+ value.
+    #
+    def set_custom_token_auth(header_value: '')
+      @auth_token_header = header_value
+    end
+
+    ##
+    # Assigns a new +User-Agent+ header to be sent in any subsequent request.
     #
     # == Parameters:
     # [*new_user_agent*] +string+ the user-agent header value.
@@ -218,12 +248,12 @@ module Network
     end
 
     def request(http_method, path, params, headers)
-      headers = @default_headers.merge(headers)
       path = formulate_path(path)
+      path = encode_path_params(path, params) if http_method == :get
 
-      if http_method == :get
-        path = encode_path_params(path, params)
-      end
+      headers = @default_headers.merge(headers)
+      headers = authenticate(headers)
+
       request = Net::HTTP::const_get(http_method.to_s.capitalize.to_sym).new(path, headers)
       request.body = params.to_s unless http_method == :get
 
@@ -240,6 +270,12 @@ module Network
 
     def basic_auth(request)
       request.basic_auth(@username, @password) unless @username.empty? && @password.empty?
+    end
+
+    def authenticate(headers)
+      headers['Authorization'] = "Bearer #{bearer_token}" unless bearer_token.empty?
+      headers['Authorization'] = auth_token_header        unless auth_token_header.empty?
+      headers
     end
 
     def http_request(request)
