@@ -24,7 +24,7 @@ module NetworkClient
     # Stamp in front of each log written by client +@logger+.
     LOG_TAG = '[NETWORK CLIENT]:'.freeze
 
-    attr_reader :username, :password, :default_headers, :logger, :tries
+    attr_reader :username, :password, :default_headers, :logger, :tries, :user_agent
 
     # Error list for retrying strategy.
     # Initially contains common errors encountered usually in net calls.
@@ -40,12 +40,15 @@ module NetworkClient
     #
     # == Parameters:
     #
-    # [*endpoint*] +String+ Uri for the host with schema and port.
+    # [*endpoint*] +string+ Uri for the host with schema and port.
     #              any other segment like paths will be discarded.
-    # [*tries*] +Integer+ to specify how many is to repeat failed calls. Default is 2.
-    # [*headers*] +Hash+ to contain any common HTTP headers to be set in client calls.
-    # [*username*] +String+ for HTTP basic authentication. Applies on all requests. Default to nil.
-    # [*password*] +String+ for HTTP basic authentication. Applies on all requests. Default to nil.
+    # [*tries*] +integer+ to specify how many is to repeat failed calls. Default is 2.
+    # [*headers*] +hash+ to contain any common HTTP headers to be set in client calls.
+    # [*username*] +string+ for HTTP basic authentication. Applies on all requests. Default to nil.
+    # [*password*] +string+ for HTTP basic authentication. Applies on all requests. Default to nil.
+    # [*user_agent*] +string+ Specifies the _User-Agent_ header value when making requests.
+    # *User-Agent* header value provided within +headers+ param in +initialize+ or on one of request
+    # methods will take precendeance over +user_agent+ param.
     #
     # == Example:
     #   require "network-client"
@@ -57,7 +60,8 @@ module NetworkClient
     #         "-1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44e.png?v7",
     #         ... }
     #
-    def initialize(endpoint:, tries: 2, headers: {}, username: nil, password: nil)
+    def initialize(endpoint:, tries: 2, headers: {}, username: nil, password: nil,
+                   user_agent: 'network-client gem')
       @uri = URI.parse(endpoint)
       @tries = tries
 
@@ -66,6 +70,7 @@ module NetworkClient
       set_basic_auth(username, password)
       set_logger
       define_error_strategies
+      set_user_agent(headers['User-Agent'] || user_agent)
     end
 
     def get(path, params = {}, headers = {})
@@ -107,6 +112,19 @@ module NetworkClient
     def set_basic_auth(username, password)
       @username = username.nil? ? '' : username
       @password = password.nil? ? '' : password
+    end
+
+    ##
+    # Assings a new +User-Agent+ header to be sent in any subsequesnt request.
+    #
+    # == Parameters:
+    # [*new_user_agent*] +string+ the user-agent header value.
+    #
+    # == Returns:
+    # [@user_agent] +string+ the newly assigned +User-Agent+ header value.
+    #
+    def set_user_agent(new_user_agent)
+      @user_agent = @default_headers['User-Agent'] = new_user_agent
     end
 
     private

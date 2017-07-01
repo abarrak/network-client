@@ -90,6 +90,21 @@ describe NetworkClient::Client do
         expect(log_store.string.scan(/Retrying now/).count).to be(0)
       end
     end
+
+    it "has default user agent" do
+      client = NetworkClient::Client.new(endpoint: 'https://opentdb.com')
+      expect(client.user_agent).not_to be_empty
+      expect(client.user_agent).to eq('network-client gem')
+      expect(client.default_headers).to include({ 'User-Agent' => 'network-client gem' })
+    end
+
+    it "supports customizing user agent header during or after initialization" do
+      user_agent = ['XYZ Service', '', nil].sample
+
+      client = NetworkClient::Client.new(endpoint: 'https://opentdb.com', user_agent: user_agent)
+      expect(client.user_agent).to eq(user_agent)
+      expect(client.default_headers).to include({ 'User-Agent' => user_agent })
+    end
   end
 
   example_group "JSON web client functionality out of the box", order: :defined do
