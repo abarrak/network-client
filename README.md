@@ -46,8 +46,7 @@ We can perform the following requests:
   ```ruby
   client.get '/todos/10'
   
-  #=> #<struct Network::Client::Response code=200,
-        body={"userId"=>1, "id"=>10, "title"=>"illo est ...", "completed"=>true}>
+  #=> #<struct Network::Client::Response code=200, body={"userId"=>1, "id"=>10, "title"=>"illo est ...", "completed"=>true}>
   ```
 
   * **POST**
@@ -55,8 +54,7 @@ We can perform the following requests:
   ```ruby
   client.post '/todos', params: { title: 'foo bar', completed: 'false', userId: 1 }.to_json
 
-  #=> #<struct Network::Client::Response code=201,
-        body={"title"=>"foo bar", "completed"=>false, "userId"=>1, "id"=>201}> 
+  #=> #<struct Network::Client::Response code=201, body={"title"=>"foo bar", "completed"=>false, "userId"=>1, "id"=>201}>
   ```
 
   * **PATCH**
@@ -64,8 +62,7 @@ We can perform the following requests:
   ```ruby
   client.patch '/todos/10', params: { title: 'new title' }.to_json
 
-  #=> #<struct Network::Client::Response code=200,
-        body={"userId"=>1, "id"=>10, "title"=>"new title", "completed"=>true}> 
+  #=> #<struct Network::Client::Response code=200, body={"userId"=>1, "id"=>10, "title"=>"new title", "completed"=>true}>
   ```
 
   * **PUT**
@@ -91,9 +88,8 @@ It holds the response's HTTP code and body parsed as JSON.
 
 ```ruby
 response = client.get '/posts/30'
-response.code #=> 200
-response.body #=> { "userId"=>3, "id"=>30, "title"=>"a quo magni similique perferendis", 
-                    "body"=>"alias dolor cumque ..." }
+response.code  #=> 200
+response.body  #=> { "userId"=>3, "id"=>30, "title"=>"a quo magni similique perferendis", "body"=>"alias dolor cumque ..." }
 ```
 
 #### Setting Request Headers
@@ -121,20 +117,20 @@ client.get 'posts/', headers: { 'X-SPECIAL-KEY' => '123456' }
   client = Network::Client.new(endpoint: 'https://api.example.com',
                                username: 'ABC', 
                                password: '999')
-  client.username #=> "ABC"
-  client.password #=> "999"
+  client.username  #=> "ABC"
+  client.password  #=> "999"
 
   # or via `#set_basic_auth`:
 
   client.set_basic_auth('John Doe', '112233')
-  client.username #=> "John Doe"
-  client.password #=> "112233"
+  client.username  #=> "John Doe"
+  client.password  #=> "112233"
   ```
 
   2. **OAuth Bearer:**
   ```ruby
   client.set_bearer_auth(token: 'e08f7739c3abb78c')
-  client.bearer_token 
+  client.bearer_token
   #=> "e08f7739c3abb78c"
   ```
 
@@ -150,14 +146,14 @@ You can set the user agent header during initialization:
 
 ```ruby
 client = Network::Client.new(endpoint: 'https://maps.googleapis.com', user_agent: 'App Service')
-client.user_agent #=> "App Service"
+client.user_agent  #=> "App Service"
 ```
 
 Or later on via `#set_user_agent` method:
 
 ```ruby
 client.set_user_agent('Gateway Server')
-client.user_agent #=> "Gateway Server"
+client.user_agent  #=> "Gateway Server"
 ```
 
 The default user agent is `Network Client`.
@@ -167,7 +163,7 @@ Set the `tries:` named argument to define the number of tries when request fails
 
 ```ruby
 client = Network::Client.new(endpoint: 'https://api.foursquare.com', tries: 3)
-client.tries #=> 3
+client.tries  #=> 3
 ```
 
 The default `#tries` is 2.
@@ -177,15 +173,11 @@ To retrieve or extend the list of triable errors through `#errors_to_recover`:
 ```ruby
 client.errors_to_recover
 
-#=> [Net::HTTPTooManyRequests, Net::HTTPServerError, Net::ProtocolError,
-     Net::HTTPBadResponse,Net::ReadTimeout, Net::OpenTimeout, Errno::ECONNREFUSED,
-     Errno::ETIMEDOUT, OpenSSL::SSL::SSLError, SocketError]
+#=> [Net::HTTPTooManyRequests, Net::HTTPServerError, Net::ProtocolError, Net::HTTPBadResponse,Net::ReadTimeout, Net::OpenTimeout, Errno::ECONNREFUSED, Errno::ETIMEDOUT, OpenSSL::SSL::SSLError, SocketError]
 
 client.errors_to_recover << Net::HTTPRequestTimeOut
 
-#=> [Net::HTTPTooManyRequests, Net::HTTPServerError, Net::ProtocolError,
-     Net::HTTPBadResponse,Net::ReadTimeout, Net::OpenTimeout, Errno::ECONNREFUSED,
-     Errno::ETIMEDOUT, OpenSSL::SSL::SSLError, SocketError, Net::HTTPRequestTimeOut]
+#=> [Net::HTTPTooManyRequests, Net::HTTPServerError, Net::ProtocolError, Net::HTTPBadResponse,Net::ReadTimeout, Net::OpenTimeout, Errno::ECONNREFUSED, Errno::ETIMEDOUT, OpenSSL::SSL::SSLError, SocketError, Net::HTTPRequestTimeOut]
 ```
 
 The list of `errors_to_propagate` takes precedence over `errors_to_recover`, and they are not retried.
