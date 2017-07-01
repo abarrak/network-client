@@ -4,9 +4,12 @@ require 'json'
 require 'logger'
 
 module Network
+  # This class is simple +JSON+ client that is meant to be initialized with a single URI.
+  # Subsequent calls should target endpoints/paths of that URI.
   class Client
-    DEFAULT_HEADERS = { 'accept' => 'application/json',
-                        'Content-Type' => 'application/json' }.freeze
+    DEFAULT_HEADERS = { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
+
+    ##
     # The success response template.
     #
     # Represents the return of rest-like methods holding two values:
@@ -59,13 +62,13 @@ module Network
       @tries = tries
 
       set_http_client
+      define_error_strategies
       set_default_headers(headers)
       set_basic_auth(username, password)
-      set_logger
-      define_error_strategies
-      set_user_agent(headers['User-Agent'] || user_agent)
       set_bearer_auth
       set_token_auth
+      set_logger
+      set_user_agent(headers['User-Agent'] || user_agent)
     end
 
     ##

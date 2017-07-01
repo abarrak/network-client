@@ -54,12 +54,27 @@ $ gem install network-client
 
 #### Customizing User Agent
 
+You can set the user agent header during initalization:
+```ruby
+client = Network::Client.new(endpoint: 'https://maps.googleapis.com', user_agent: 'App Service')
+client.user_agnet #=> "App Service"
+```
+
+Or later on via `#set_user_agent` method:
+
+```ruby
+client.set_user_agent('Gatewya Server')
+client.user_agnet #=> "Gatewya Server"
+```
+
+#### Retry and Error Handling
+
 #### Logger
 
 
 ## Documentation 
 
-For more details refer to [the API documentation](http://www.rubydoc.info/gems/network-client/Network/Client).
+For more details refer to [the API documentation](http://www.rubydoc.info/gems/network-client/2.0.0/Network/Client).
 
 ## Contributing
 
