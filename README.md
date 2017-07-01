@@ -67,6 +67,8 @@ client.set_user_agent('Gatewya Server')
 client.user_agnet #=> "Gatewya Server"
 ```
 
+The default user agent is `Network Client`.
+
 #### Retry and Error Handling
 
 #### Logger

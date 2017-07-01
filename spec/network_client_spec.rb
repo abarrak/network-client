@@ -17,7 +17,7 @@ describe Network::Client do
 
     it "has default headers set" do
       expect(subject.default_headers).to be_kind_of(Hash)
-      expect(subject.default_headers).to include('accept'       => 'application/json',
+      expect(subject.default_headers).to include('Accept'       => 'application/json',
                                                  'Content-Type' => 'application/json')
     end
 
@@ -91,8 +91,8 @@ describe Network::Client do
     it "has default user agent" do
       client = Network::Client.new(endpoint: 'https://opentdb.com')
       expect(client.user_agent).not_to be_empty
-      expect(client.user_agent).to eq('network-client gem')
-      expect(client.default_headers).to include({ 'User-Agent' => 'network-client gem' })
+      expect(client.user_agent).to eq('Network Client')
+      expect(client.default_headers).to include({ 'User-Agent' => 'Network Client' })
     end
 
     it "supports customizing user agent header during or after initialization" do

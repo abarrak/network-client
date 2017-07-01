@@ -57,7 +57,7 @@ module Network
     #         ... }
     #
     def initialize(endpoint:, tries: 2, headers: {}, username: nil, password: nil,
-                   user_agent: 'network-client gem')
+                   user_agent: 'Network Client')
       @uri = URI.parse(endpoint)
       @tries = tries
 
