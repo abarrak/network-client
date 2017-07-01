@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'net/http'
 require 'openssl'
 require 'json'
@@ -17,7 +18,7 @@ module Network
     Response = Struct.new(:code, :body)
 
     # Stamp in front of each log written by client +@logger+.
-    LOG_TAG = '[NETWORK CLIENT]:'.freeze
+    LOG_TAG = '[NETWORK CLIENT]:'
 
     attr_reader :username, :password, :default_headers, :logger, :tries, :user_agent,
                 :bearer_token, :auth_token_header
@@ -330,7 +331,7 @@ module Network
 
     def formulate_path(path)
       path = '/'  if path.nil? || path.empty?
-      path.strip! if path.respond_to?(:strip)
+      path = path.strip if path.respond_to?(:strip)
       path.prepend('/') unless path.chars.first == '/'
       path
     end

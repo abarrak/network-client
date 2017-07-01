@@ -193,7 +193,7 @@ describe Network::Client do
       client = Network::Client.new(endpoint: 'https://quotes.rest')
       client.set_logger { Logger.new(log_store) }
 
-      response = client.get '/not-there-at-all.json'
+      response = client.get 'not-there-at-all.json'
       expect(response.code).to be(404)
       expect(response.body).not_to be_empty
       expect(response.body['error']['message']).to eq('Not Found')
