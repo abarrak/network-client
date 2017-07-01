@@ -5,14 +5,6 @@ require 'logger'
 module NetworkClient
   class Client
 
-    HTTP_VERBS = {
-      :get    => Net::HTTP::Get,
-      :post   => Net::HTTP::Post,
-      :patch  => Net::HTTP::Patch,
-      :put    => Net::HTTP::Put,
-      :delete => Net::HTTP::Delete
-    }
-
     DEFAULT_HEADERS = { 'accept' => 'application/json',
                         'Content-Type' => 'application/json' }.freeze
 
@@ -169,16 +161,14 @@ module NetworkClient
       headers = @default_headers.merge(headers)
       path = formulate_path(path)
 
-      case http_method
-      when :get
-        full_path = encode_path_params(path, params)
-        request = HTTP_VERBS[http_method].new(full_path, headers)
-      else
-        request = HTTP_VERBS[http_method].new(path, headers)
-        request.body = params.to_s
+      if http_method == :get
+        path = encode_path_params(path, params)
       end
+      request = Net::HTTP::const_get(http_method.to_s.capitalize.to_sym).new(path, headers)
+      request.body = params.to_s unless http_method == :get
 
       basic_auth(request)
+
       response = http_request(request)
 
       unless Net::HTTPSuccess === response
