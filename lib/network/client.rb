@@ -65,7 +65,7 @@ module Network
       define_error_strategies
       set_user_agent(headers['User-Agent'] || user_agent)
       set_bearer_auth
-      set_custom_token_auth
+      set_token_auth
     end
 
     ##
@@ -198,7 +198,7 @@ module Network
     # == Returns:
     # [@auth_token_header] +string+ the newly assigned +@auth_token_header+ value.
     #
-    def set_custom_token_auth(header_value: '')
+    def set_token_auth(header_value: '')
       @auth_token_header = header_value
     end
 
