@@ -4,7 +4,6 @@ GithubGist = Struct.new :description, :public, :files do
   end
 end
 
-
 FactoryGirl.define do
   factory :github_gist do
     description 'Network Client Test'

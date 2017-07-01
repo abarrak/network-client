@@ -2,7 +2,7 @@ require 'net/http'
 require 'json'
 require 'logger'
 
-module NetworkClient
+module Network
   class Client
     DEFAULT_HEADERS = { 'accept' => 'application/json',
                         'Content-Type' => 'application/json' }.freeze

@@ -1,14 +1,11 @@
-require 'stringio'
-require 'dotenv/load'
-require 'network-client'
-require 'factories/factories'
+require 'spec_helper'
 
-describe NetworkClient::Client do
+describe Network::Client do
   describe "Initialization and Normal Behavior" do
-    subject(:client) { NetworkClient::Client.new(endpoint: 'https://deckofcardsapi.com', tries: 3) }
+    subject(:client) { Network::Client.new(endpoint: 'https://deckofcardsapi.com', tries: 3) }
 
     it "generates functioning instance" do
-      is_expected.to be_kind_of(NetworkClient::Client)
+      is_expected.to be_kind_of(Network::Client)
       expect(subject.tries).to eq(3)
       [:get, :post, :put, :delete].each { |m| is_expected.to respond_to(m) }
 
@@ -26,7 +23,7 @@ describe NetworkClient::Client do
 
     it "makes requests" do
       # Quotes API has limit of 10 requests per hour
-      client = NetworkClient::Client.new(endpoint: 'https://quotes.rest/')
+      client = Network::Client.new(endpoint: 'https://quotes.rest/')
       client.set_logger { Logger.new(StringIO.new) }
 
       response = client.get('/qod.json', params: { category: 'inspire' })
@@ -73,7 +70,7 @@ describe NetworkClient::Client do
     context "Retry and Propagate" do
       let(:log_store)  { StringIO.new }
       let(:error_code) { error_code = [429, 500, 502, 503, 504].sample }
-      let!(:client)    { NetworkClient::Client.new(endpoint: 'https://httpstat.us', tries: 4) }
+      let!(:client)    { Network::Client.new(endpoint: 'https://httpstat.us', tries: 4) }
 
       before(:each) { client.set_logger { Logger.new(log_store) } }
 
@@ -92,7 +89,7 @@ describe NetworkClient::Client do
     end
 
     it "has default user agent" do
-      client = NetworkClient::Client.new(endpoint: 'https://opentdb.com')
+      client = Network::Client.new(endpoint: 'https://opentdb.com')
       expect(client.user_agent).not_to be_empty
       expect(client.user_agent).to eq('network-client gem')
       expect(client.default_headers).to include({ 'User-Agent' => 'network-client gem' })
@@ -101,7 +98,7 @@ describe NetworkClient::Client do
     it "supports customizing user agent header during or after initialization" do
       user_agent = ['XYZ Service', '', nil].sample
 
-      client = NetworkClient::Client.new(endpoint: 'https://opentdb.com', user_agent: user_agent)
+      client = Network::Client.new(endpoint: 'https://opentdb.com', user_agent: user_agent)
       expect(client.user_agent).to eq(user_agent)
       expect(client.default_headers).to include({ 'User-Agent' => user_agent })
     end
@@ -110,7 +107,7 @@ describe NetworkClient::Client do
   example_group "JSON web client functionality out of the box", order: :defined do
     let!(:token) { ENV.fetch('GITHUB_OAUTH_TOKEN') }
     let(:user)   { "abarrak" }
-    let(:client) { NetworkClient::Client.new(endpoint: 'https://api.github.com') }
+    let(:client) { Network::Client.new(endpoint: 'https://api.github.com') }
 
     example '#get' do
       response = client.get "/gists/4849a20d2ba89b34b201?access_token=#{token}"
@@ -178,13 +175,13 @@ describe NetworkClient::Client do
   example_group "Normal HTML form functionality" do
     example "#get_html" do
       expect{
-        NetworkClient::Client.new(endpoint: 'https://google.com').get_html nil
+        Network::Client.new(endpoint: 'https://google.com').get_html nil
       }.to raise_error(NotImplementedError)
     end
 
     example "#post_form" do
       expect{
-        NetworkClient::Client.new(endpoint: 'https://google.com').post_form nil
+        Network::Client.new(endpoint: 'https://google.com').post_form nil
       }.to raise_error(NotImplementedError)
     end
   end
@@ -193,7 +190,7 @@ describe NetworkClient::Client do
     let(:log_store) { StringIO.new }
 
     specify "logging unsuccessful requests" do
-      client = NetworkClient::Client.new(endpoint: 'https://quotes.rest')
+      client = Network::Client.new(endpoint: 'https://quotes.rest')
       client.set_logger { Logger.new(log_store) }
 
       response = client.get '/not-there-at-all.json'
@@ -204,7 +201,7 @@ describe NetworkClient::Client do
     end
 
     specify "handling json parsing errors" do
-      client = NetworkClient::Client.new(endpoint: 'https://www.apple.com')
+      client = Network::Client.new(endpoint: 'https://www.apple.com')
       client.set_logger { Logger.new(log_store) }
 
       response = client.get '/mac/'
@@ -220,14 +217,14 @@ describe NetworkClient::Client do
       url  = [base, "#{base}/", "#{base}:80" ].sample
       path = [nil, '', '   '].sample
 
-      client = NetworkClient::Client.new endpoint: url
+      client = Network::Client.new endpoint: url
       res = client.get path
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('name', 'products')
     end
 
     specify "endpint with improper or proper path" do
-      client = NetworkClient::Client.new endpoint: 'http://api.openweathermap.org'
+      client = Network::Client.new endpoint: 'http://api.openweathermap.org'
       path = ['data/2.5/weather', '/data/2.5/weather'].sample
       res = client.get path, params: { lat: 35, lon: 139, appid: ENV.fetch('OPEN_WEATHERMAP_API') }
       expect(res.code).to eq(200)

@@ -1,2 +1,2 @@
-require_relative "network-client/core"
-require_relative "network-client/version"
+require_relative "network/client"
+require_relative "network/version"
