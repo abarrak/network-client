@@ -2,12 +2,12 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'network-client/version'
+require 'network/version'
 require 'date'
 
 Gem::Specification.new do |spec|
   spec.name          = "network-client"
-  spec.version       = NetworkClient::VERSION
+  spec.version       = Network::VERSION
   spec.date          = Date.today.to_s
   spec.authors       = ["Abdullah Barrak (abarrak)"]
   spec.email         = ["abdullah@abarrak.com"]
