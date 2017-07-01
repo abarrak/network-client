@@ -29,7 +29,7 @@ describe NetworkClient::Client do
       client = NetworkClient::Client.new(endpoint: 'https://quotes.rest/')
       client.set_logger { Logger.new(StringIO.new) }
 
-      response = client.get('/qod.json', { category: 'inspire' })
+      response = client.get('/qod.json', params: { category: 'inspire' })
       expect(response.body).not_to be_empty
 
       if response.code == 200
@@ -122,7 +122,7 @@ describe NetworkClient::Client do
 
     example "#post" do
       gist = FactoryGirl.build(:github_gist)
-      response = client.post "/gists?access_token=#{token}", gist.to_json
+      response = client.post "/gists?access_token=#{token}", params: gist.to_json
       expect(response.code).to eq(201)
       expect(response.body).not_to be_empty
       expect(response.body.keys).to include('url', 'id', 'forks', 'commits_url', 'owner')
@@ -131,7 +131,7 @@ describe NetworkClient::Client do
     example "#patch" do
       gist_id = last_gist_id
       params = { description: 'New description ~' }
-      response = client.patch "/gists/#{gist_id}?access_token=#{token}", params.to_json
+      response = client.patch "/gists/#{gist_id}?access_token=#{token}", params: params.to_json
       expect(response.code).to eq(200)
       expect(response.body).not_to be_empty
       expect(response.body.keys).to include('url', 'id', 'forks', 'commits_url', 'owner')
@@ -141,7 +141,7 @@ describe NetworkClient::Client do
     example "#put" do
       gist_id = last_gist_id
       zero_content = { 'Content-Length' => '0' }
-      response = client.put "/gists/#{gist_id}/star?access_token=#{token}", nil, zero_content
+      response = client.put "/gists/#{gist_id}/star?access_token=#{token}", headers: zero_content
       expect(response.code).to eq(204)
       expect(response.body).to be_nil
 
@@ -158,7 +158,7 @@ describe NetworkClient::Client do
     end
 
     example "#get with query parameters" do
-      response = client.get "/gists/public", { access_token: token, page: 2, per_page: 20 }
+      response = client.get "/gists/public", params: { access_token: token, page: 2, per_page: 20 }
       expect(response.code).to eq(200)
       expect(response.body).to be_kind_of(Array)
       expect(response.body.size).to eq(20)
@@ -229,7 +229,7 @@ describe NetworkClient::Client do
     specify "endpint with improper or proper path" do
       client = NetworkClient::Client.new endpoint: 'http://api.openweathermap.org'
       path = ['data/2.5/weather', '/data/2.5/weather'].sample
-      res = client.get path, { lat: 35, lon: 139, appid: ENV.fetch('OPEN_WEATHERMAP_API') }
+      res = client.get path, params: { lat: 35, lon: 139, appid: ENV.fetch('OPEN_WEATHERMAP_API') }
       expect(res.code).to eq(200)
       expect(res.body.keys).to include('coord', 'weather', 'main', 'wind', 'clouds')
       expect(res.body['coord']['lat']).to be_within(0.5).of(35)

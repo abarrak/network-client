@@ -4,10 +4,8 @@ require 'logger'
 
 module NetworkClient
   class Client
-
     DEFAULT_HEADERS = { 'accept' => 'application/json',
                         'Content-Type' => 'application/json' }.freeze
-
     # The success response template.
     #
     # Represents the return of rest-like methods holding two values:
@@ -66,34 +64,96 @@ module NetworkClient
       set_user_agent(headers['User-Agent'] || user_agent)
     end
 
-    def get(path, params = {}, headers = {})
+    ##
+    # Perform a get request on the targeted client +endpoint+.
+    #
+    # == Parameters:
+    # [*path*] +string+ path on client's target host.
+    # [*params*] request parameters to be url encoded. Can be +hash+ or pair of values +array+.
+    # [*headers*] +hash+ set of http request headers.
+    #
+    # == Returns:
+    # http response data cotained in +Response+ strcut.
+    #
+    def get(path, params: {}, headers: {})
       request_json :get, path, params, headers
     end
 
-    def post(path, params = {}, headers = {})
+    ##
+    # Perform a post request on the targeted client +endpoint+.
+    #
+    # == Parameters:
+    # [*path*] +string+ path on client's target host.
+    # [*params*] +hash+ request parameters to json encoded in request body.
+    # [*headers*] +hash+ set of http request headers.
+    #
+    # == Returns:
+    # http response data cotained in +Response+ strcut.
+    #
+    def post(path, params: {}, headers: {})
       request_json :post, path, params, headers
     end
 
-    def patch(path, params = {}, headers = {})
+    ##
+    # Perform a patch request on the targeted client +endpoint+.
+    #
+    # == Parameters:
+    # [*path*] +string+ path on client's target host.
+    # [*params*] +hash+ request parameters to json encoded in request body.
+    # [*headers*] +hash+ set of http request headers.
+    #
+    # == Returns:
+    # http response data cotained in +Response+ strcut.
+    #
+    def patch(path, params: {}, headers: {})
       request_json :patch, path, params, headers
     end
 
-    def put(path, params = {}, headers = {})
+    ##
+    # Perform a put request on the targeted client +endpoint+.
+    #
+    # == Parameters:
+    # [*path*] +string+ path on client's target host.
+    # [*params*] +hash+ request parameters to json encoded in request body.
+    # [*headers*] +hash+ set of http request headers.
+    #
+    # == Returns:
+    # http response data cotained in +Response+ strcut.
+    #
+    def put(path, params: {}, headers: {})
       request_json :put, path, params, headers
     end
 
-    def delete(path, params = {}, headers = {})
+    ##
+    # Perform a delete request on the targeted client +endpoint+.
+    #
+    # == Parameters:
+    # [*path*] +string+ path on client's target host.
+    # [*params*] +hash+ request parameters to json encoded in request body.
+    # [*headers*] +hash+ set of http request headers.
+    #
+    # == Returns:
+    # http response data cotained in +Response+ strcut.
+    #
+    def delete(path, params: {}, headers: {})
       request_json :delete, path, params, headers
     end
 
-    def get_html(path, params = {}, headers = {})
+    def get_html(path, params: {}, headers: {})
       raise NotImplementedError
     end
 
-    def post_form(path, params = {}, headers = {})
+    def post_form(path, params: {}, headers: {})
       raise NotImplementedError
     end
 
+    ##
+    # Sets the client logger object.
+    # Exceution is yieleded to passed +block+ to set, customize, and returning a logger instance.
+    #
+    # == Returns:
+    # +logger+ instance variable.
+    #
     def set_logger
       @logger = if block_given?
         yield
