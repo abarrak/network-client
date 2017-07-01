@@ -12,9 +12,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Abdullah Barrak (abarrak)"]
   spec.email         = ["abdullah@abarrak.com"]
 
-  spec.summary       = "A thin resilient wrapper around ruby's Net::HTTP."
-  spec.description   = "network-client gem is almost a drop-in thin layer around Net::HTTP classes \
-                        with simple error handling and retry functionality implemented."
+  spec.summary       = "A thin resilient JSON web client built around Net::HTTP"
+  spec.description   = "network-client is a drop-in thin layer on top of Net::HTTP classes for \
+                        JSON web requests with retry functionality and simple error handling"
   spec.homepage      = "https://github.com/abarrak/network-client"
   spec.license       = "MIT"
 

@@ -1,5 +1,7 @@
 # Network Client
+
 [![Gem Version](https://badge.fury.io/rb/network-client.svg)](https://rubygems.org/gems/network-client)
+[![Gem](https://img.shields.io/gem/dt/network-client.svg?colorB=8b0000)](https://rubygems.org/gems/network-client)
 [![Build Status](https://travis-ci.org/abarrak/network-client.svg?branch=master)](https://travis-ci.org/abarrak/network-client)
 [![Dependency Status](https://gemnasium.com/badges/github.com/abarrak/network-client.svg)](https://gemnasium.com/github.com/abarrak/network-client)
 [![Test Coverage](https://codeclimate.com/github/abarrak/network-client/badges/coverage.svg)](https://codeclimate.com/github/abarrak/network-client/coverage)
@@ -27,7 +29,33 @@ $ gem install network-client
 ```
 
 ## Usage
- 
+
+#### Making JSON requests
+
+  * *GET*
+
+  * *POST*
+
+  * *PATCH*
+
+  * *PUT*
+
+  * *DELETE*
+
+#### Setting Request Headers
+
+#### HTTP Authentication
+
+  1. **Basic**
+
+  2. **OAuth Bearer**
+
+  3. **Token**
+
+#### Customizing User Agent
+
+#### Logger
+
 
 ## Documentation 
 
