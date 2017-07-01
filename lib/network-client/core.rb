@@ -8,6 +8,7 @@ module NetworkClient
     HTTP_VERBS = {
       :get    => Net::HTTP::Get,
       :post   => Net::HTTP::Post,
+      :patch  => Net::HTTP::Patch,
       :put    => Net::HTTP::Put,
       :delete => Net::HTTP::Delete
     }
@@ -81,6 +82,10 @@ module NetworkClient
       request_json :post, path, params, headers
     end
 
+    def patch(path, params = {}, headers = {})
+      request_json :patch, path, params, headers
+    end
+
     def put(path, params = {}, headers = {})
       request_json :put, path, params, headers
     end
@@ -89,11 +94,11 @@ module NetworkClient
       request_json :delete, path, params, headers
     end
 
-    def post_form(path, params = {}, headers = {})
+    def get_html(path, params = {}, headers = {})
       raise NotImplementedError
     end
 
-    def put_form(path, params = {}, headers = {})
+    def post_form(path, params = {}, headers = {})
       raise NotImplementedError
     end
 

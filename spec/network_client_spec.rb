@@ -128,21 +128,31 @@ describe NetworkClient::Client do
       expect(response.body.keys).to include('url', 'id', 'forks', 'commits_url', 'owner')
     end
 
+    example "#patch" do
+      gist_id = last_gist_id
+      params = { description: 'New description ~' }
+      response = client.patch "/gists/#{gist_id}?access_token=#{token}", params.to_json
+      expect(response.code).to eq(200)
+      expect(response.body).not_to be_empty
+      expect(response.body.keys).to include('url', 'id', 'forks', 'commits_url', 'owner')
+      expect(response.body['description']).to eq(params[:description])
+    end
+
     example "#put" do
       gist_id = last_gist_id
       zero_content = { 'Content-Length' => '0' }
-      response = client.put "/gists/#{@gist_id}/star?access_token=#{token}", nil, zero_content
+      response = client.put "/gists/#{gist_id}/star?access_token=#{token}", nil, zero_content
       expect(response.code).to eq(204)
       expect(response.body).to be_nil
 
       # Dobule check that gist is starred ..
-      response = client.get "/gists/#{@gist_id}/star?access_token=#{token}"
+      response = client.get "/gists/#{gist_id}/star?access_token=#{token}"
       expect(response.code).to eq(204)
     end
 
     example "#delete" do
       gist_id = last_gist_id
-      response = client.delete "/gists/#{@gist_id}?access_token=#{token}"
+      response = client.delete "/gists/#{gist_id}?access_token=#{token}"
       expect(response.code).to eq(204)
       expect(response.body).to be_nil
     end
@@ -158,21 +168,23 @@ describe NetworkClient::Client do
       gists = client.get "/users/#{user}/gists?access_token=#{token}"
       expect(gists.code).to eq(200)
       expect(gists.body).to be_kind_of(Array)
-      expect(created = gists.body.first).to include({ 'description' => 'Network Client Test' })
-      expect(@gist_id = created['id']).not_to be_empty
+      expect(created = gists.body.first).not_to be_empty
+      expect(gist_id = created['id']).not_to be_empty
+      expect(created['description']).to eq('Network Client Test').or eq('New description ~')
+      gist_id
     end
   end
 
   example_group "Normal HTML form functionality" do
-    example "#post_form" do
+    example "#get_html" do
       expect{
-        NetworkClient::Client.new(endpoint: 'https://google.com').post_form nil
+        NetworkClient::Client.new(endpoint: 'https://google.com').get_html nil
       }.to raise_error(NotImplementedError)
     end
 
-    example "#put_form" do
+    example "#post_form" do
       expect{
-        NetworkClient::Client.new(endpoint: 'https://google.com').put_form nil
+        NetworkClient::Client.new(endpoint: 'https://google.com').post_form nil
       }.to raise_error(NotImplementedError)
     end
   end
