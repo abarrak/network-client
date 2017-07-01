@@ -1,4 +1,5 @@
 require 'net/http'
+require 'openssl'
 require 'json'
 require 'logger'
 
@@ -45,7 +46,7 @@ module Network
     # == Example:
     #   require "network-client"
     #
-    #   github_client = NetworkClient::Client.new(endpoint: 'https://api.github.com')
+    #   github_client = Network::Client.new(endpoint: 'https://api.github.com')
     #   github_client.get '/emojis'
     #
     #   #=> { "+1": "https://assets-cdn.github.com/images/icons/emoji/unicode/1f44d.png?v7",
