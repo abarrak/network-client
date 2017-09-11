@@ -32,6 +32,9 @@ module Network
     # Do not assign ancestor error classes here that prevent retry for descendant ones.
     attr_accessor :errors_to_propagate
 
+    # Gives access to underlying NET::HTTP client instance.
+    attr_accessor :http
+
     ##
     # Construct and prepare client for requests targeting +endpoint+.
     #

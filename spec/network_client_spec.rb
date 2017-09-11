@@ -102,6 +102,14 @@ describe Network::Client do
       expect(client.user_agent).to eq(user_agent)
       expect(client.default_headers).to include({ 'User-Agent' => user_agent })
     end
+
+    it "gives access to underlying NET::HTTP instance for override or customization" do
+      expect(subject.http).to be_kind_of(Net::HTTP)
+      subject.http.open_timeout = 30
+      subject.http.read_timeout = 30
+      expect(subject.http.open_timeout).to eq(30)
+      expect(subject.http.read_timeout).to eq(30)
+    end
   end
 
   example_group "JSON web client functionality out of the box", order: :defined do
