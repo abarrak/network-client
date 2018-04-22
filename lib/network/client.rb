@@ -243,10 +243,16 @@ module Network
                               Net::OpenTimeout,
                               Errno::ECONNREFUSED,
                               Errno::ETIMEDOUT,
+                              Errno::ECONNRESET,
+                              Errno::EHOSTUNREACH,
+                              Timeout::Error,
                               OpenSSL::SSL::SSLError,
+                              EOFError,
                               SocketError]
       @errors_to_propagate = [Net::HTTPRequestURITooLarge,
-                              Net::HTTPMethodNotAllowed]
+                              Net::HTTPMethodNotAllowed,
+                              Zlib::BufError,
+                              OpenSSL::X509::CertificateError]
     end
 
     def request_json(http_method, path, params, headers)
