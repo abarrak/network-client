@@ -248,7 +248,8 @@ module Network
                               Timeout::Error,
                               OpenSSL::SSL::SSLError,
                               EOFError,
-                              SocketError]
+                              SocketError,
+                              IOError]
       @errors_to_propagate = [Net::HTTPRequestURITooLarge,
                               Net::HTTPMethodNotAllowed,
                               Zlib::BufError,
