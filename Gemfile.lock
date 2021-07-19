@@ -22,7 +22,7 @@ GEM
     i18n (0.8.1)
     json (2.1.0)
     minitest (5.10.2)
-    rake (10.5.0)
+    rake (13.0.6)
     rspec (3.6.0)
       rspec-core (~> 3.6.0)
       rspec-expectations (~> 3.6.0)
@@ -54,7 +54,7 @@ DEPENDENCIES
   dotenv (~> 2.2)
   factory_girl (~> 4.5)
   network-client!
-  rake (~> 10.0)
+  rake (~> 13.0)
   rspec (~> 3.6)
   simplecov (~> 0.14.1)
 
