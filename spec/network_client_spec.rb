@@ -69,7 +69,7 @@ describe Network::Client do
 
     context "Retry and Propagate" do
       let(:log_store)  { StringIO.new }
-      let!(:error_code) { error_code = [429, 500, 502, 503, 504].sample }
+      let!(:error_code) { error_code = [429, 500, 502, 503].sample }
       let!(:client)    { Network::Client.new(endpoint: 'https://httpstat.us', tries: 4) }
 
       before(:each) { client.set_logger { Logger.new(log_store) } }
