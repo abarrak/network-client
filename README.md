@@ -2,8 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/network-client.svg)](https://rubygems.org/gems/network-client)
 [![Gem](https://img.shields.io/gem/dt/network-client.svg?colorB=8b0000)](https://rubygems.org/gems/network-client)
-[![Build Status](https://travis-ci.org/abarrak/network-client.svg?branch=master)](https://travis-ci.org/abarrak/network-client)
-[![Dependency Status](https://gemnasium.com/badges/github.com/abarrak/network-client.svg)](https://gemnasium.com/github.com/abarrak/network-client)
+[![Build Status](https://www.travis-ci.com/abarrak/network-client.svg?branch=master)](https://www.travis-ci.com/abarrak/network-client)
 [![Test Coverage](https://codeclimate.com/github/abarrak/network-client/badges/coverage.svg)](https://codeclimate.com/github/abarrak/network-client/coverage)
 [![Code Climate](https://lima.codeclimate.com/github/abarrak/network-client/badges/gpa.svg)](https://lima.codeclimate.com/github/abarrak/network-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

@@ -4,12 +4,14 @@ GithubGist = Struct.new :description, :public, :files do
   end
 end
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :github_gist do
-    description 'Network Client Test'
-    public :true
-    files {{ 'test_text_file.txt' =>
-            { 'content' =>  'this simple text file is maid for testing purposes only ! .. ' }
-          }}
+    description { 'Network Client Test' }
+    public { :true }
+    files {{
+      'test_text_file.txt' => {
+        'content' =>  'this simple text file is maid for testing purposes only ! .. '
+      }
+    }}
   end
 end

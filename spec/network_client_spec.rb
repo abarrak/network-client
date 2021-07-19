@@ -126,7 +126,7 @@ describe Network::Client do
     end
 
     example "#post" do
-      gist = FactoryGirl.build(:github_gist)
+      gist = FactoryBot.build(:github_gist)
       response = client.post "/gists?access_token=#{token}", params: gist.to_json
       expect(response.code).to eq(201)
       expect(response.body).not_to be_empty
