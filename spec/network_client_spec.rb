@@ -221,7 +221,7 @@ describe Network::Client do
 
   describe "handling different shapes of provided urls" do
     specify "endpint with no path or empty path" do
-      base = 'http://samples.openweathermap.org'
+      base = 'https://samples.openweathermap.org/'
       url  = [base, "#{base}/", "#{base}:80" ].sample
       path = [nil, '', '   '].sample
 
@@ -232,7 +232,7 @@ describe Network::Client do
     end
 
     specify "endpint with improper or proper path" do
-      client = Network::Client.new endpoint: 'http://api.openweathermap.org'
+      client = Network::Client.new endpoint: 'https://api.openweathermap.org'
       path = ['data/2.5/weather', '/data/2.5/weather'].sample
       res = client.get path, params: { lat: 35, lon: 139, appid: ENV.fetch('OPEN_WEATHERMAP_API') }
       expect(res.code).to eq(200)
