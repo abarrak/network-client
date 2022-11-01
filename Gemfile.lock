@@ -17,7 +17,7 @@ GEM
     concurrent-ruby (1.1.9)
     diff-lcs (1.4.4)
     docile (1.4.0)
-    dotenv (2.7.6)
+    dotenv (2.8.1)
     factory_bot (6.2.0)
       activesupport (>= 5.0.0)
     i18n (1.8.10)
