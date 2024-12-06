@@ -2,9 +2,9 @@
 
 [![Gem Version](https://badge.fury.io/rb/network-client.svg)](https://rubygems.org/gems/network-client)
 [![Gem](https://img.shields.io/gem/dt/network-client.svg?colorB=8b0000)](https://rubygems.org/gems/network-client)
-[![Build Status](https://www.travis-ci.com/abarrak/network-client.svg?branch=master)](https://www.travis-ci.com/abarrak/network-client)
-[![Test Coverage](https://codeclimate.com/github/abarrak/network-client/badges/coverage.svg)](https://codeclimate.com/github/abarrak/network-client/coverage)
-[![Code Climate](https://lima.codeclimate.com/github/abarrak/network-client/badges/gpa.svg)](https://lima.codeclimate.com/github/abarrak/network-client)
+[![Build Status](https://app.travis-ci.com/abarrak/network-client.svg?token=6srXbW1inBqbcVxZhTbQ&branch=master)](https://app.travis-ci.com/abarrak/network-client)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/bb30437b8d29917d0bd6/test_coverage)](https://codeclimate.com/github/abarrak/network-client/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/bb30437b8d29917d0bd6/maintainability)](https://codeclimate.com/github/abarrak/network-client/maintainability)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Installation
